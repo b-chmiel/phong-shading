@@ -1,0 +1,20 @@
+{
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "buildDebug",
+            "command": "make debug",
+            "problemMatcher": [],
+        },
+        {
+            "type": "shell",
+            "label": "run",
+            "command": "make run",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
