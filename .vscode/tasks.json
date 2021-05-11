@@ -9,7 +9,7 @@
         {
             "type": "shell",
             "label": "run",
-            "command": "make run",
+            "command": "make runDebug",
             "problemMatcher": [],
             "group": {
                 "kind": "build",

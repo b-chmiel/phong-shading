@@ -1,11 +1,12 @@
 #ifndef DRAW_H
 #define DRAW_H
 
+#include "config.h"
 #include <SFML/Graphics.hpp>
 
 namespace draw {
 
-void printRender(int width, int height, int radius, sf::Texture* texture);
+void printRender(Config config, sf::Texture* texture);
 
 };
 

@@ -1,5 +1,7 @@
 LIB_NAME = main
 
+CLI_ARGUMENTS = input/first.ini
+
 CXX = ccache clang++
 GCOV = gcov
 GCOVR = gcovr
@@ -20,19 +22,24 @@ SRCS = $(shell find $(SRC_DIR) -name '*.cc')
 
 $(LIB_NAME):
 	mkdir -p $(OUT_DIR)
-	$(CXX) -c $(SRCS) $(RELEASE_FLAGS)
+	$(CXX) -c $(SRCS) $(RELEASE_FLAGS) 
 	$(CXX) *.o -o $(OUT_DIR)/$(LIB_NAME) -lsfml-graphics -lsfml-window -lsfml-system
 	rm -f *.o
 
-debug: 
-	scan-build make
+debug: # analyze
 	mkdir -p $(OUT_DIR)
-	$(CXX) -c $(SRCS) $(DEBUG_FLAGS)
+	$(CXX) -c $(SRCS) $(DEBUG_FLAGS) 
 	$(CXX) *.o -o $(OUT_DIR)/$(LIB_NAME) -lsfml-graphics -lsfml-window -lsfml-system
 	rm -f *.o
+
+analyze:
+	$(CXX) --analyze -Xanalyzer -analyzer-output=text $(SRCS)
 
 run: $(LIB_NAME)
-	./build/main
+	./build/main $(CLI_ARGUMENTS)
+
+runDebug: debug
+	./$(OUT_DIR)/main $(CLI_ARGUMENTS)
 
 valgrind:  debug
 	valgrind --tool=memcheck --leak-check=full --show-reachable=yes --track-origins=yes ./$(OUT_DIR)/$(LIB_NAME) 
@@ -54,4 +61,3 @@ clean:
 
 gdb: debug
 	gdb ./$(OUT_DIR)/$(LIB_NAME)
-
