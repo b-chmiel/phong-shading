@@ -1,17 +1,19 @@
 #ifndef PHONG_H
 #define PHONG_H
 
+#include "preciseColor.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
 
 using namespace sf;
 
 namespace phong {
+
 class LightSource {
 public:
-    sf::Color color;
+    PreciseColor color;
     sf::Vector3f location;
-    LightSource(sf::Color color, sf::Vector3f location)
+    LightSource(PreciseColor color, sf::Vector3f location)
         : color(color)
         , location(location) {};
 };
@@ -19,16 +21,18 @@ public:
 class PhongParameters {
 public:
     PhongParameters() = default;
-    sf::Color diffuseReflection;
-    sf::Color specularReflection;
+    PreciseColor diffuseReflection;
+    PreciseColor specularReflection;
     float glossiness;
-    sf::Color ambientLight;
-    sf::Color ambientLightIntensity;
-    sf::Color selfLuminance;
+    PreciseColor ambientLight;
+    PreciseColor ambientLightIntensity;
+    PreciseColor selfLuminance;
     std::vector<LightSource> lightSources;
+    float distance;
 };
 
-sf::Color getLightIntensity(PhongParameters parameters);
+PreciseColor computeColor(sf::Vector3f intersection, PhongParameters params);
+
 }
 
 #endif

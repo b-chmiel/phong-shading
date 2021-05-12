@@ -2,6 +2,7 @@
 #include "../lib/inih/INIReader.h"
 #include "SFML/System/Vector2.hpp"
 #include "SFML/System/Vector3.hpp"
+#include "preciseColor.h"
 #include <sstream>
 
 int getPointSources(INIReader config);
@@ -10,7 +11,7 @@ std::string getFileName(INIReader config);
 int getRadius(INIReader config);
 phong::PhongParameters getPhongParams(INIReader config, int pointSources);
 float getGlossiness(INIReader config);
-sf::Color parseColor(INIReader config, std::string section);
+PreciseColor parseColor(INIReader config, std::string section);
 phong::LightSource getLightSource(INIReader config, std::string section);
 std::vector<phong::LightSource> getLightSources(INIReader config, int sources);
 
@@ -57,6 +58,7 @@ phong::PhongParameters getPhongParams(INIReader config, int pointSources)
     result.ambientLightIntensity = parseColor(config, "ambientLightIntensity");
     result.selfLuminance = parseColor(config, "selfLuminance");
     result.lightSources = getLightSources(config, pointSources);
+    result.distance = getRadius(config);
 
     return result;
 }
@@ -66,14 +68,14 @@ float getGlossiness(INIReader config)
     return config.GetFloat("glossiness", "g", 0);
 }
 
-sf::Color parseColor(INIReader config, std::string section)
+PreciseColor parseColor(INIReader config, std::string section)
 {
-    int red = config.GetInteger(section, "red", 0);
-    int green = config.GetInteger(section, "green", 0);
-    int blue = config.GetInteger(section, "blue", 0);
-    int alpha = config.GetInteger(section, "alpha", 255);
+    float red = config.GetFloat(section, "red", 0);
+    float green = config.GetFloat(section, "green", 0);
+    float blue = config.GetFloat(section, "blue", 0);
+    float alpha = config.GetFloat(section, "alpha", 255);
 
-    return sf::Color(red, green, blue, alpha);
+    return PreciseColor(red, green, blue, alpha);
 }
 
 phong::LightSource getLightSource(INIReader config, std::string section)

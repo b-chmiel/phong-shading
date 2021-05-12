@@ -1,5 +1,6 @@
 #include "draw.h"
 #include "config.h"
+#include "phong.h"
 #include "utils.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Vector2.hpp>
@@ -9,8 +10,8 @@
 
 sf::Vector3f getProjectionPlaneVector(int i, int j, Config config);
 std::optional<sf::Vector3f> intersectionWithSphere(sf::Vector3f current);
-void saveToFile(int width, int height, sf::Uint8* pixels);
-sf::Color getColor(sf::Vector3f intersection, Config config);
+PreciseColor getColor(sf::Vector3f intersection, phong::PhongParameters params);
+void saveToFile(sf::Vector2i dimensions, sf::Uint8* pixels);
 
 void draw::printRender(Config config, sf::Texture* texture)
 {
@@ -29,35 +30,34 @@ void draw::printRender(Config config, sf::Texture* texture)
         auto intersection = intersectionWithSphere(current);
 
         if (intersection) {
-            sf::Color color = getColor(*intersection, config);
-            pixels[i] = color.r;
-            pixels[i + 1] = color.g;
-            pixels[i + 2] = color.b;
-            pixels[i + 3] = color.a;
+            PreciseColor color = getColor(*intersection, config.params);
+            pixels[i] = (int)color.r;
+            pixels[i + 1] = (int)color.g;
+            pixels[i + 2] = (int)color.b;
+            pixels[i + 3] = (int)color.a;
         } else {
-            pixels[i] = config.background.r;
-            pixels[i + 1] = config.background.g;
-            pixels[i + 2] = config.background.b;
-            pixels[i + 3] = config.background.a;
+            pixels[i] = (int)config.background.r;
+            pixels[i + 1] = (int)config.background.g;
+            pixels[i + 2] = (int)config.background.b;
+            pixels[i + 3] = (int)config.background.a;
         }
     }
 
     texture->update(pixels);
 
-    saveToFile(width, height, pixels);
+    saveToFile(config.outputDimensions, pixels);
 
     delete[] pixels;
 }
 
-// TODO remove those * 2, It will enlarge sphere
 sf::Vector3f getProjectionPlaneVector(int i, int j, Config config)
 {
     int n = config.outputDimensions.x;
     int m = config.outputDimensions.y;
     int r = config.radius;
 
-    double x = r * (((2 * i) / (double)(n - 1)) - 1) * 2;
-    double y = r * (1 - ((2 * j) / (double)(m - 1))) * 2;
+    double x = r * (((2 * i) / (double)(n - 1)) - 1);
+    double y = r * (1 - ((2 * j) / (double)(m - 1)));
 
     return sf::Vector3f(x, y, -r);
 }
@@ -77,14 +77,14 @@ std::optional<sf::Vector3f> intersectionWithSphere(sf::Vector3f current)
     return sf::Vector3f(x, y, sqrt(coeff));
 }
 
-sf::Color getColor(sf::Vector3f intersection, Config config)
+PreciseColor getColor(sf::Vector3f intersection, phong::PhongParameters params)
 {
-    return config.params.selfLuminance;
+    return phong::computeColor(intersection, params);
 }
 
-void saveToFile(int width, int height, sf::Uint8* pixels)
+void saveToFile(sf::Vector2i dimensions, sf::Uint8* pixels)
 {
     sf::Image image;
-    image.create(width, height, pixels);
+    image.create(dimensions.x, dimensions.y, pixels);
     image.saveToFile("output/output.bmp");
 }

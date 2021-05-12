@@ -15,7 +15,7 @@ public:
     std::string fileName;
     int radius;
     phong::PhongParameters params;
-    sf::Color background;
+    PreciseColor background;
 
     Config(INIReader config);
 };
