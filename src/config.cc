@@ -4,6 +4,26 @@
 #include "SFML/System/Vector3.hpp"
 #include <sstream>
 
+int getPointSources(INIReader config);
+sf::Vector2i getDimensions(INIReader config);
+std::string getFileName(INIReader config);
+int getRadius(INIReader config);
+phong::PhongParameters getPhongParams(INIReader config, int pointSources);
+float getGlossiness(INIReader config);
+sf::Color parseColor(INIReader config, std::string section);
+phong::LightSource getLightSource(INIReader config, std::string section);
+std::vector<phong::LightSource> getLightSources(INIReader config, int sources);
+
+Config::Config(INIReader config)
+{
+    Config::pointSources = getPointSources(config);
+    Config::outputDimensions = getDimensions(config);
+    Config::fileName = getFileName(config);
+    Config::radius = getRadius(config);
+    Config::params = getPhongParams(config, Config::pointSources);
+    Config::background = parseColor(config, "background");
+}
+
 int getPointSources(INIReader config)
 {
     return config.GetInteger("main", "pointSources", -1);
@@ -26,6 +46,26 @@ int getRadius(INIReader config)
     return config.GetInteger("main", "radius", -1);
 }
 
+phong::PhongParameters getPhongParams(INIReader config, int pointSources)
+{
+    auto result = phong::PhongParameters();
+
+    result.diffuseReflection = parseColor(config, "diffuseReflection");
+    result.specularReflection = parseColor(config, "specularReflection");
+    result.glossiness = getGlossiness(config);
+    result.ambientLight = parseColor(config, "ambientLight");
+    result.ambientLightIntensity = parseColor(config, "ambientLightIntensity");
+    result.selfLuminance = parseColor(config, "selfLuminance");
+    result.lightSources = getLightSources(config, pointSources);
+
+    return result;
+}
+
+float getGlossiness(INIReader config)
+{
+    return config.GetFloat("glossiness", "g", 0);
+}
+
 sf::Color parseColor(INIReader config, std::string section)
 {
     int red = config.GetInteger(section, "red", 0);
@@ -36,7 +76,7 @@ sf::Color parseColor(INIReader config, std::string section)
     return sf::Color(red, green, blue, alpha);
 }
 
-LightSource getLightSource(INIReader config, std::string section)
+phong::LightSource getLightSource(INIReader config, std::string section)
 {
     auto color = parseColor(config, section);
     int x = config.GetFloat(section, "x", 10);
@@ -45,12 +85,12 @@ LightSource getLightSource(INIReader config, std::string section)
 
     sf::Vector3f location(x, y, z);
 
-    return LightSource(color, location);
+    return phong::LightSource(color, location);
 }
 
-std::vector<LightSource> getLightSources(INIReader config, int sources)
+std::vector<phong::LightSource> getLightSources(INIReader config, int sources)
 {
-    std::vector<LightSource> result;
+    std::vector<phong::LightSource> result;
     for (int i = 0; i < sources; i++) {
         std::stringstream ss;
         ss << "light" << i;
@@ -59,15 +99,4 @@ std::vector<LightSource> getLightSources(INIReader config, int sources)
     }
 
     return result;
-}
-
-Config::Config(INIReader config)
-{
-    Config::pointSources = getPointSources(config);
-    Config::outputDimensions = getDimensions(config);
-    Config::fileName = getFileName(config);
-    Config::radius = getRadius(config);
-    Config::surface = parseColor(config, "sphereSurface");
-    Config::ambientLight = parseColor(config, "ambientLight");
-    Config::lightSources = getLightSources(config, Config::pointSources);
 }
