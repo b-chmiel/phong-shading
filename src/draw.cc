@@ -10,10 +10,17 @@ bool isPointInCircle(sf::Vector2i current, sf::Vector2i origin, int radius)
     return utils::lengthOrVector(current - origin) <= radius;
 }
 
+void saveToFile(int width, int height, sf::Uint8* pixels)
+{
+    sf::Image image;
+    image.create(width, height, pixels);
+    image.saveToFile("output/output.bmp");
+}
+
 void draw::printRender(Config config, sf::Texture* texture)
 {
-    int width = texture->getSize().x;
-    int height = texture->getSize().y;
+    const int width = texture->getSize().x;
+    const int height = texture->getSize().y;
 
     const int colorCoeff = 4;
     const int pixelsLength = width * height * colorCoeff;
@@ -35,11 +42,13 @@ void draw::printRender(Config config, sf::Texture* texture)
             pixels[i] = 100;
             pixels[i + 1] = 100;
             pixels[i + 2] = 100;
-            pixels[i + 3] = 100;
+            pixels[i + 3] = 255;
         }
     }
 
     texture->update(pixels);
+
+    saveToFile(width, height, pixels);
 
     delete[] pixels;
 }

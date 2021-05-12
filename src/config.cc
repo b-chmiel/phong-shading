@@ -1,6 +1,7 @@
 #include "config.h"
 #include "../lib/inih/INIReader.h"
 #include "SFML/System/Vector2.hpp"
+#include "SFML/System/Vector3.hpp"
 #include <sstream>
 
 int getPointSources(INIReader config)
@@ -40,8 +41,9 @@ LightSource getLightSource(INIReader config, std::string section)
     auto color = parseColor(config, section);
     int x = config.GetFloat(section, "x", 10);
     int y = config.GetFloat(section, "y", 10);
+    int z = config.GetFloat(section, "z", 10);
 
-    sf::Vector2f location(x, y);
+    sf::Vector3f location(x, y, z);
 
     return LightSource(color, location);
 }

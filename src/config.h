@@ -4,13 +4,14 @@
 #include "../lib/inih/INIReader.h"
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <SFML/System/Vector3.hpp>
 #include <vector>
 
 class LightSource {
 public:
     sf::Color color;
-    sf::Vector2f location;
-    LightSource(sf::Color color, sf::Vector2f location)
+    sf::Vector3f location;
+    LightSource(sf::Color color, sf::Vector3f location)
         : color(color)
         , location(location) {};
 };
