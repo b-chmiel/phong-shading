@@ -3,11 +3,23 @@
 #include "utils.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <SFML/System/Vector3.hpp>
 #include <math.h>
+#include <optional>
 
-bool isPointInCircle(sf::Vector2i current, sf::Vector2i origin, int radius)
+std::optional<sf::Vector3f> intersectionWithSphere(sf::Vector3f current)
 {
-    return utils::lengthOrVector(current - origin) <= radius;
+    float x = current.x;
+    float y = current.y;
+    float r = current.z;
+
+    double coeff = r * r - x * x - y * y;
+
+    if (coeff < 0) {
+        return std::nullopt;
+    }
+
+    return sf::Vector3f(x, y, sqrt(coeff));
 }
 
 void saveToFile(int width, int height, sf::Uint8* pixels)
@@ -15,6 +27,18 @@ void saveToFile(int width, int height, sf::Uint8* pixels)
     sf::Image image;
     image.create(width, height, pixels);
     image.saveToFile("output/output.bmp");
+}
+
+sf::Vector3f getProjectionPlaneVector(int i, int j, Config config)
+{
+    int n = config.outputDimensions.x;
+    int m = config.outputDimensions.y;
+    int r = config.radius;
+
+    double x = r * (((2 * i) / (double)(n - 1)) - 1) * 2;
+    double y = r * (1 - ((2 * j) / (double)(m - 1))) * 2;
+
+    return sf::Vector3f(x, y, -r);
 }
 
 void draw::printRender(Config config, sf::Texture* texture)
@@ -26,14 +50,14 @@ void draw::printRender(Config config, sf::Texture* texture)
     const int pixelsLength = width * height * colorCoeff;
     sf::Uint8* pixels = new sf::Uint8[pixelsLength];
 
-    sf::Vector2i origin(width / 2, height / 2);
-
-    for (auto i = 0; i < pixelsLength - colorCoeff; i += colorCoeff) {
-        int x = i / colorCoeff % (width);
+    for (auto i = 0; i <= pixelsLength - colorCoeff; i += colorCoeff) {
+        int x = i / colorCoeff % width;
         int y = (i / colorCoeff) / width;
-        sf::Vector2i current(x, y);
 
-        if (isPointInCircle(current, origin, config.radius)) {
+        sf::Vector3f current = getProjectionPlaneVector(x, y, config);
+        auto intersection = intersectionWithSphere(current);
+
+        if (intersection) {
             pixels[i] = config.surface.r;
             pixels[i + 1] = config.surface.g;
             pixels[i + 2] = config.surface.b;

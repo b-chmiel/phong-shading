@@ -2,7 +2,7 @@ LIB_NAME = main
 
 CLI_ARGUMENTS = input/first.ini
 
-CXX = ccache clang++
+CXX = ccache clang++ -std=c++20
 GCOV = gcov
 GCOVR = gcovr
 
