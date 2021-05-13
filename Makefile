@@ -1,6 +1,6 @@
 LIB_NAME = main
 
-CLI_ARGUMENTS = input/moon.ini
+CLI_ARGUMENTS = input/matePlastic.ini
 
 CXX = ccache clang++ -std=c++20
 GCOV = gcov

@@ -23,7 +23,7 @@ PreciseColor PhongShading::computeColor()
 
 PreciseColor PhongShading::diffuse()
 {
-    auto list = PhongShading::params.lightSources;
+    auto lights = PhongShading::params.lightSources;
     auto N = getUnitSurface();
     auto kd = PhongShading::params.diffuseReflection;
 
@@ -33,13 +33,13 @@ PreciseColor PhongShading::diffuse()
         return total + lightAttenuation(light) * light.color * dot;
     };
 
-    return kd * std::accumulate(list.begin(), list.end(), PreciseColor(), sum);
+    return kd * std::accumulate(lights.begin(), lights.end(), PreciseColor(), sum);
 }
 
 PreciseColor PhongShading::specular()
 {
-    Vector3f observerLocation(0, 0, 0);
-    auto list = PhongShading::params.lightSources;
+    Vector3f observerLocation(0, 0, -1);
+    auto lights = PhongShading::params.lightSources;
     auto ks = PhongShading::params.specularReflection;
     auto g = PhongShading::params.glossiness;
     auto Os = reflectedObserverUnitVector(observerLocation);
@@ -50,7 +50,7 @@ PreciseColor PhongShading::specular()
         return total + lightAttenuation(light) * light.color * pow(dot, g);
     };
 
-    return ks * std::accumulate(list.begin(), list.end(), PreciseColor(), sum);
+    return ks * std::accumulate(lights.begin(), lights.end(), PreciseColor(), sum);
 }
 
 float PhongShading::lightAttenuation(LightSource source)
