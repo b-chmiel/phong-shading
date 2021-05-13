@@ -1,6 +1,6 @@
 LIB_NAME = main
 
-CLI_ARGUMENTS = input/first.ini
+CLI_ARGUMENTS = input/moon.ini
 
 CXX = ccache clang++ -std=c++20
 GCOV = gcov
@@ -14,9 +14,14 @@ RELEASE_FLAGS = -O2 -DNDEBUG -g
 SRC_DIR = src
 OUT_DIR = build
 LIB_DIR = lib
+TST_DIR = test
+OUTPUT_DIR = output
 
 SRCS = $(shell find $(SRC_DIR) -name '*.cc')
+TSTS = $(shell find $(TST_DIR) -name '*.cc')
+TESTED = src/vectorUtils.cc
 
+export OUTDIR = $(OUTPUT_DIR)/
 
 .PHONY: run clean valgrind coverage format gdb
 
@@ -40,6 +45,13 @@ run: $(LIB_NAME)
 
 runDebug: debug
 	./$(OUT_DIR)/main $(CLI_ARGUMENTS)
+
+buildTest:
+	$(CXX) $(DEBUG_FLAGS) $(TSTS) -L$(LIB_DIR) -o $(OUT_DIR)/test -lsfml-graphics -lsfml-system -I$(SRC_DIR) $(TESTED)
+	rm -f *.o
+
+test: buildTest 
+	./$(OUT_DIR)/test
 
 valgrind:  debug
 	valgrind --tool=memcheck --leak-check=full --show-reachable=yes --track-origins=yes ./$(OUT_DIR)/$(LIB_NAME) 

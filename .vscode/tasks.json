@@ -8,6 +8,12 @@
         },
         {
             "type": "shell",
+            "label": "buildTest",
+            "command": "make buildTest",
+            "problemMatcher": [],
+        },
+        {
+            "type": "shell",
             "label": "run",
             "command": "make runDebug",
             "problemMatcher": [],

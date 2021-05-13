@@ -14,6 +14,7 @@ float getGlossiness(INIReader config);
 PreciseColor parseColor(INIReader config, std::string section);
 phong::LightSource getLightSource(INIReader config, std::string section);
 std::vector<phong::LightSource> getLightSources(INIReader config, int sources);
+phong::LightAttenuation getLightAttenuation(INIReader config);
 
 Config::Config(INIReader config)
 {
@@ -59,6 +60,7 @@ phong::PhongParameters getPhongParams(INIReader config, int pointSources)
     result.selfLuminance = parseColor(config, "selfLuminance");
     result.lightSources = getLightSources(config, pointSources);
     result.distance = getRadius(config);
+    result.attenuation = getLightAttenuation(config);
 
     return result;
 }
@@ -101,4 +103,13 @@ std::vector<phong::LightSource> getLightSources(INIReader config, int sources)
     }
 
     return result;
+}
+
+phong::LightAttenuation getLightAttenuation(INIReader config)
+{
+    const std::string section = "lightAttenuation";
+    float c0 = config.GetFloat(section, "c0", -1);
+    float c1 = config.GetFloat(section, "c1", -1);
+    float c2 = config.GetFloat(section, "c2", -1);
+    return phong::LightAttenuation(c0, c1, c2);
 }

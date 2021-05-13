@@ -18,6 +18,18 @@ public:
         , location(location) {};
 };
 
+class LightAttenuation {
+public:
+    float c0;
+    float c1;
+    float c2;
+    LightAttenuation() = default;
+    LightAttenuation(float c0, float c1, float c2)
+        : c0(c0)
+        , c1(c1)
+        , c2(c2) {};
+};
+
 class PhongParameters {
 public:
     PhongParameters() = default;
@@ -29,9 +41,25 @@ public:
     PreciseColor selfLuminance;
     std::vector<LightSource> lightSources;
     float distance;
+    LightAttenuation attenuation;
 };
 
-PreciseColor computeColor(sf::Vector3f intersection, PhongParameters params);
+class PhongShading {
+public:
+    PhongShading(PhongParameters params, sf::Vector3f position);
+
+    PreciseColor computeColor();
+
+private:
+    PhongParameters params;
+    sf::Vector3f position;
+
+    PreciseColor diffuse();
+    PreciseColor specular();
+    float lightAttenuation(LightSource source);
+    sf::Vector3f getUnitSurface();
+    sf::Vector3f reflectedObserverUnitVector(sf::Vector3f observer);
+};
 
 }
 

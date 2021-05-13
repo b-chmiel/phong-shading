@@ -1,63 +1,82 @@
 #include "phong.h"
 #include "preciseColor.h"
-#include "utils.h"
+#include "vectorUtils.h"
 #include <algorithm>
+#include <cmath>
+#include <iostream>
 #include <numeric>
 
 using namespace phong;
 
-PreciseColor diffuse(PhongParameters params, sf::Vector3f location);
-PreciseColor specular(PhongParameters params);
-float lightAttenuation(LightSource source, sf::Vector3f currentPosition);
-sf::Vector3f getUnitSurface(sf::Vector3f location, PhongParameters params);
+PhongShading::PhongShading(PhongParameters params, sf::Vector3f position)
+    : params(params)
+    , position(position) {};
 
-PreciseColor phong::computeColor(sf::Vector3f location, PhongParameters params)
+PreciseColor PhongShading::computeColor()
 {
     PreciseColor S = params.selfLuminance;
-    PreciseColor kd = params.diffuseReflection;
-    PreciseColor ks = params.specularReflection;
     PreciseColor ka = params.ambientLight;
     PreciseColor Ac = params.ambientLightIntensity;
-    float g = params.glossiness;
 
-    auto result = S + diffuse(params, location) + specular(params) + ka * Ac;
-    return result;
+    return S + diffuse() + specular() + ka * Ac;
 }
 
-PreciseColor diffuse(PhongParameters params, sf::Vector3f location)
+PreciseColor PhongShading::diffuse()
 {
-    auto list = params.lightSources;
-    auto N = getUnitSurface(location, params);
-    auto kd = params.diffuseReflection;
-    auto lambda = [&](PreciseColor total, LightSource light) {
-        auto I = utils::unitVector(light.location, location);
-        return total + lightAttenuation(light, location) * light.color * utils::dotProduct(N, I);
+    auto list = PhongShading::params.lightSources;
+    auto N = getUnitSurface();
+    auto kd = PhongShading::params.diffuseReflection;
+
+    auto sum = [&](PreciseColor total, LightSource light) {
+        auto I = utils::unitVector(light.location - PhongShading::position);
+        auto dot = std::max(utils::dotProduct(N, I), 0.0f);
+        return total + lightAttenuation(light) * light.color * dot;
     };
 
-    auto result = kd * std::accumulate(list.begin(), list.end(), PreciseColor(), lambda);
-    return result;
+    return kd * std::accumulate(list.begin(), list.end(), PreciseColor(), sum);
 }
 
-PreciseColor specular(PhongParameters params)
+PreciseColor PhongShading::specular()
 {
-    return PreciseColor();
+    Vector3f observerLocation(0, 0, 0);
+    auto list = PhongShading::params.lightSources;
+    auto ks = PhongShading::params.specularReflection;
+    auto g = PhongShading::params.glossiness;
+    auto Os = reflectedObserverUnitVector(observerLocation);
+
+    auto sum = [&](PreciseColor total, LightSource light) {
+        auto I = utils::unitVector(light.location - PhongShading::position);
+        auto dot = std::max(utils::dotProduct(I, Os), 0.0f);
+        return total + lightAttenuation(light) * light.color * pow(dot, g);
+    };
+
+    return ks * std::accumulate(list.begin(), list.end(), PreciseColor(), sum);
 }
 
-float lightAttenuation(LightSource source, sf::Vector3f currentPosition)
+float PhongShading::lightAttenuation(LightSource source)
 {
-    auto r = utils::distanceBetweenPoints(source.location, currentPosition);
-    auto c0 = source.color.r;
-    auto c1 = source.color.g;
-    auto c2 = source.color.b;
+    auto r = utils::distanceBetweenPoints(source.location, PhongShading::position);
+    auto c0 = PhongShading::params.attenuation.c0;
+    auto c1 = PhongShading::params.attenuation.c1;
+    auto c2 = PhongShading::params.attenuation.c2;
 
     return std::min(1 / (c2 * r * r + c1 * r + c0), 1.0f);
 }
 
-sf::Vector3f getUnitSurface(sf::Vector3f location, PhongParameters params)
+sf::Vector3f PhongShading::getUnitSurface()
 {
-    float x = location.x / params.distance;
-    float y = location.y / params.distance;
-    float z = location.z / params.distance;
+    float x = PhongShading::position.x / params.distance;
+    float y = PhongShading::position.y / params.distance;
+    float z = PhongShading::position.z / params.distance;
 
     return sf::Vector3f(x, y, z);
+}
+
+sf::Vector3f PhongShading::reflectedObserverUnitVector(sf::Vector3f observer)
+{
+    auto surfaceUnit = getUnitSurface();
+    auto surfaceObserver = utils::unitVector(observer - PhongShading::position);
+    auto specularyReflect = surfaceObserver - 2 * (utils::dotProduct(surfaceObserver, surfaceUnit)) * surfaceUnit;
+
+    return specularyReflect;
 }
