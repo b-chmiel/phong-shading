@@ -1,6 +1,7 @@
 #include "draw.h"
 #include "config.h"
 #include "phong.h"
+#include "surface.h"
 #include "vectorUtils.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Vector2.hpp>
@@ -11,7 +12,7 @@
 
 sf::Vector3f getProjectionPlaneVector(int i, int j, Config config);
 std::optional<sf::Vector3f> intersectionWithSphere(sf::Vector3f current);
-sf::Color getColor(sf::Vector3f intersection, phong::PhongParameters params);
+sf::Color getColor(const sf::Vector3f& intersection, const Config& params);
 void saveToFile(sf::Uint8* pixels, Config config);
 std::string getFilePath(std::string fileName);
 
@@ -32,7 +33,7 @@ void draw::printRender(Config config, sf::Texture* texture)
         auto intersection = intersectionWithSphere(current);
 
         if (intersection) {
-            auto color = getColor(*intersection, config.params);
+            auto color = getColor(*intersection, config);
             pixels[i] = color.r;
             pixels[i + 1] = color.g;
             pixels[i + 2] = color.b;
@@ -79,10 +80,11 @@ std::optional<sf::Vector3f> intersectionWithSphere(sf::Vector3f current)
     return sf::Vector3f(x, y, sqrt(coeff));
 }
 
-sf::Color getColor(sf::Vector3f intersection, phong::PhongParameters params)
+sf::Color getColor(const sf::Vector3f& intersection, const Config& config)
 {
-    auto shading = phong::PhongShading(params, intersection);
-    PreciseColor precise = shading.computeColor();
+    auto surfaceColor = Surface::getSurfaceColor(intersection, config);
+    auto shading = phong::PhongShading(config.params, intersection);
+    PreciseColor precise = shading.computeColor(surfaceColor);
     int r = abs(precise.r);
     int g = abs(precise.g);
     int b = abs(precise.b);

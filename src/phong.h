@@ -48,7 +48,7 @@ class PhongShading {
 public:
     PhongShading(PhongParameters params, sf::Vector3f position);
 
-    PreciseColor computeColor();
+    PreciseColor computeColor(PreciseColor& selfLuminance);
 
 private:
     PhongParameters params;

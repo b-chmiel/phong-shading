@@ -15,6 +15,7 @@ PreciseColor parseColor(INIReader config, std::string section);
 phong::LightSource getLightSource(INIReader config, std::string section);
 std::vector<phong::LightSource> getLightSources(INIReader config, int sources);
 phong::LightAttenuation getLightAttenuation(INIReader config);
+Pattern getPattern(INIReader config);
 
 Config::Config(INIReader config)
 {
@@ -24,6 +25,7 @@ Config::Config(INIReader config)
     Config::radius = getRadius(config);
     Config::params = getPhongParams(config, Config::pointSources);
     Config::background = parseColor(config, "background");
+    Config::pattern = getPattern(config);
 }
 
 int getPointSources(INIReader config)
@@ -112,4 +114,15 @@ phong::LightAttenuation getLightAttenuation(INIReader config)
     float c1 = config.GetFloat(section, "c1", -1);
     float c2 = config.GetFloat(section, "c2", -1);
     return phong::LightAttenuation(c0, c1, c2);
+}
+
+Pattern getPattern(INIReader config)
+{
+    auto pattern = config.Get("main", "pattern", "");
+
+    if (pattern == "checkerboard") {
+        return Pattern::CHECKERBOARD;
+    }
+
+    return Pattern::NONE;
 }

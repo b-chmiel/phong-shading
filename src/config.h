@@ -8,6 +8,10 @@
 #include <SFML/System/Vector3.hpp>
 #include <vector>
 
+enum Pattern {
+    NONE,
+    CHECKERBOARD
+};
 class Config {
 public:
     int pointSources;
@@ -16,6 +20,7 @@ public:
     int radius;
     phong::PhongParameters params;
     PreciseColor background;
+    Pattern pattern;
 
     Config(INIReader config);
 };

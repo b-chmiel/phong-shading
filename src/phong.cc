@@ -12,13 +12,12 @@ PhongShading::PhongShading(PhongParameters params, sf::Vector3f position)
     : params(params)
     , position(position) {};
 
-PreciseColor PhongShading::computeColor()
+PreciseColor PhongShading::computeColor(PreciseColor& selfLuminance)
 {
-    PreciseColor S = params.selfLuminance;
     PreciseColor ka = params.ambientLight;
     PreciseColor Ac = params.ambientLightIntensity;
 
-    return S + diffuse() + specular() + ka * Ac;
+    return selfLuminance + diffuse() + specular() + ka * Ac;
 }
 
 PreciseColor PhongShading::diffuse()
