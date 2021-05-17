@@ -83,6 +83,7 @@ std::optional<sf::Vector3f> intersectionWithSphere(sf::Vector3f current)
 sf::Color getColor(const sf::Vector3f& intersection, const Config& config)
 {
     auto surfaceColor = Surface::getSurfaceColor(intersection, config);
+
     auto shading = phong::PhongShading(config.params, intersection);
     PreciseColor precise = shading.computeColor(surfaceColor);
     int r = abs(precise.r);

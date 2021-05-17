@@ -12,8 +12,8 @@ public:
 
 private:
     static PreciseColor getCheckerboard(const sf::Vector3f& position, const Config& config);
-    static bool IsSumEven(const sf::Vector2i& onPlane, float squareSize);
-    static sf::Vector2i transformFromSphereToPlane(const sf::Vector3f& position);
+    static bool isSumEven(const sf::Vector2f& onPlane, float squareSize);
+    static sf::Vector2f transformFromSphereToPlane(const sf::Vector3f& position, int radius);
 };
 
 #endif
