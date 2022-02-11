@@ -5,6 +5,7 @@
 #include <SFML/System/Vector2.hpp>
 #include <filesystem>
 #include <iostream>
+#include <optional>
 
 std::optional<Config> getConfig(int argc, char** argv)
 {
